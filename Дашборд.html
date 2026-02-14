@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benchmark юридических AI-моделей — Дашборд</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f8fa;
+  --white: #ffffff;
+  --text: #1a1a1a;
+  --text2: #7b7e86;
+  --text3: #a0a3ab;
+  --border: #e5e7eb;
+  --border2: #edeef0;
+  --yellow: #ffcc00;
+  --yellow-soft: #fff8db;
+  --blue: #4a90d9;
+  --blue-soft: #eef4fb;
+  --red: #e8453c;
+  --red-soft: #fdeeed;
+  --green: #3aa757;
+  --green-soft: #edf7ef;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.07);
+  --radius: 12px;
+
+  --c-neuro: #e8453c;
+  --c-gpt: #8b5cf6;
+  --c-claude: #3aa757;
+  --c-giga: #e09100;
+  --c-cons: #4a90d9;
+}
+
+* { 
+  margin: 0; 
+  padding: 0; 
+  box-sizing: border-box; 
+}
+
+html {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  word-wrap: break-word;
+}
+
+/* MOBILE FIRST - базовые стили для мобильных */
+.container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 16px 12px 32px;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* KPI - мобильная версия (1 колонка) */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.kpi-card {
+  padding: 14px 16px;
+}
+
+.kpi-model {
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.kpi-score {
+  font-size: 22px;
+}
+
+.kpi-details {
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Context grid - мобильная версия (1 колонка) */
+.context-grid {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.context-item {
+  padding: 12px 14px;
+}
+
+.context-item .value {
+  font-size: 18px;
+}
+
+/* Grids - мобильная версия (1 колонка) */
+.grid-2,
+.grid-3 {
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+/* Card - мобильная версия */
+.card {
+  padding: 14px 16px;
+}
+
+.card-title {
+  font-size: 13px;
+}
+
+.card-subtitle {
+  font-size: 11px;
+}
+
+.card-header {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.card-insight {
+  padding: 8px 12px;
+  font-size: 11px;
+}
+
+/* Header - мобильная версия */
+.header-top {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.header-top h1 {
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.header p {
+  font-size: 12px;
+}
+
+.badge {
+  font-size: 10px;
+  padding: 2px 6px;
+}
+
+/* Context banner - мобильная версия */
+.context-banner {
+  padding: 16px 18px;
+}
+
+.context-banner h3 {
+  font-size: 13px;
+}
+
+.context-banner p {
+  font-size: 12px;
+}
+
+/* Findings - мобильная версия */
+.findings {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.finding {
+  padding: 12px 14px;
+  font-size: 12px;
+}
+
+/* Hallucination bars - мобильная версия */
+.hall-label {
+  width: 70px;
+  min-width: 70px;
+  font-size: 11px;
+}
+
+.hall-bar {
+  font-size: 11px;
+  padding-left: 8px;
+}
+
+.hall-count {
+  width: 25px;
+  font-size: 11px;
+}
+
+/* Methodology - мобильная версия */
+.methodology {
+  padding: 16px 18px;
+}
+
+.methodology h3 {
+  font-size: 13px;
+}
+
+.methodology p {
+  font-size: 12px;
+}
+
+.scale-row {
+  gap: 6px;
+}
+
+.scale-item {
+  padding: 5px 10px;
+  font-size: 11px;
+}
+
+/* Tabs - мобильная версия */
+.tab-nav {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.tab-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-btn {
+  padding: 10px 16px;
+  font-size: 12px;
+  white-space: nowrap;
+  min-height: 44px;
+}
+
+/* Charts - мобильная версия */
+.chart-container {
+  min-height: 180px;
+}
+
+.chart-container[style*="height"] {
+  height: 220px !important;
+  min-height: 220px;
+}
+
+.radar-wrap {
+  max-width: 100%;
+}
+
+/* Table wrapper - мобильная версия */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+  margin-left: -12px;
+  margin-right: -12px;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.data-table {
+  font-size: 11px;
+  min-width: 500px;
+}
+
+.data-table th,
+.data-table td {
+  padding: 8px 10px;
+  white-space: nowrap;
+}
+
+.data-table th {
+  font-size: 10px;
+}
+
+.data-table td:first-child {
+  white-space: normal;
+  min-width: 80px;
+  max-width: 150px;
+}
+
+/* ПЛАНШЕТЫ (768px и выше) */
+@media (min-width: 768px) {
+  .container {
+    padding: 20px 16px 40px;
+  }
+  
+  .header-top {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .header-top h1 {
+    font-size: 20px;
+  }
+  
+  .header p {
+    font-size: 13px;
+  }
+  
+  .kpi-strip {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .kpi-card {
+    padding: 16px 18px;
+  }
+  
+  .kpi-model {
+    font-size: 15px;
+  }
+  
+  .kpi-score {
+    font-size: 24px;
+  }
+  
+  .kpi-details {
+    flex-direction: row;
+    gap: 12px;
+  }
+  
+  .context-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .context-item {
+    padding: 14px 16px;
+  }
+  
+  .context-item .value {
+    font-size: 20px;
+  }
+  
+  .grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .card {
+    padding: 16px 18px;
+  }
+  
+  .card-title {
+    font-size: 14px;
+  }
+  
+  .card-subtitle {
+    font-size: 12px;
+  }
+  
+  .card-header {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .card-insight {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+  
+  .findings {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .finding {
+    padding: 14px 16px;
+    font-size: 13px;
+  }
+  
+  .hall-label {
+    width: 100px;
+    font-size: 13px;
+  }
+  
+  .hall-count {
+    width: 30px;
+    font-size: 12px;
+  }
+  
+  .methodology {
+    padding: 20px 24px;
+  }
+  
+  .methodology h3 {
+    font-size: 14px;
+  }
+  
+  .methodology p {
+    font-size: 13px;
+  }
+  
+  .scale-item {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .tab-btn {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+  
+  .chart-container {
+    min-height: 200px;
+  }
+  
+  .chart-container[style*="height"] {
+    height: 250px !important;
+    min-height: 250px;
+  }
+  
+  .table-wrapper {
+    margin-left: -18px;
+    margin-right: -18px;
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+  
+  .data-table {
+    font-size: 12px;
+    min-width: 550px;
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: 10px 12px;
+  }
+  
+  .data-table th {
+    font-size: 11px;
+  }
+}
+
+/* ПЛАНШЕТЫ БОЛЬШИЕ (1024px и выше) */
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1200px;
+    padding: 24px 20px 48px;
+  }
+  
+  .kpi-strip {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .context-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .header-top h1 {
+    font-size: 24px;
+  }
+  
+  .header p {
+    font-size: 14px;
+  }
+  
+  .kpi-card {
+    padding: 18px 20px;
+  }
+  
+  .kpi-model {
+    font-size: 16px;
+  }
+  
+  .kpi-score {
+    font-size: 28px;
+  }
+  
+  .card {
+    padding: 20px 24px;
+  }
+  
+  .context-banner {
+    padding: 20px 24px;
+  }
+  
+  .table-wrapper {
+    margin-left: -24px;
+    margin-right: -24px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  
+  .data-table {
+    font-size: 13px;
+    min-width: 600px;
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: 10px 12px;
+  }
+  
+  .data-table th {
+    font-size: 11px;
+  }
+  
+  .data-table td:first-child {
+    max-width: 200px;
+  }
+}
+
+/* ДЕСКТОП (1200px и выше) */
+@media (min-width: 1200px) {
+  .container {
+    padding: 32px 24px 64px;
+  }
+  
+  .kpi-strip {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* HEADER */
+.header {
+  margin-bottom: 32px;
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.header-top h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  flex: 1;
+  min-width: 0;
+}
+.badge {
+  display: inline-block;
+  background: var(--yellow);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: .3px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.header p {
+  color: var(--text2);
+  font-size: 14px;
+  max-width: 720px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* CONTEXT BANNER */
+.context-banner {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+.context-banner h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+.context-banner p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.65;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.context-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+  width: 100%;
+  min-width: 0;
+}
+.context-item {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 14px 16px;
+  min-width: 0;
+  overflow: hidden;
+}
+.context-item .label {
+  font-size: 11px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.context-item .value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.context-item .sub {
+  font-size: 12px;
+  color: var(--text2);
+  margin-top: 2px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* KPI STRIP */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+  width: 100%;
+  min-width: 0;
+}
+.kpi-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  box-shadow: var(--shadow);
+  position: relative;
+  transition: box-shadow .15s;
+  min-width: 0;
+  overflow: hidden;
+}
+.kpi-card:hover { box-shadow: var(--shadow-md); }
+.kpi-rank {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.kpi-card:nth-child(1) .kpi-rank { color: #c99400; }
+.kpi-card:nth-child(2) .kpi-rank { color: #8a8d94; }
+.kpi-card:nth-child(3) .kpi-rank { color: #b87333; }
+.kpi-model {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 2px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+.kpi-score {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -.5px;
+}
+.kpi-details {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text2);
+  flex-wrap: wrap;
+  width: 100%;
+}
+.kpi-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.kpi-pill.good { background: var(--green-soft); color: var(--green); }
+.kpi-pill.bad { background: var(--red-soft); color: var(--red); }
+
+/* CARDS */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; width: 100%; min-width: 0; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; width: 100%; min-width: 0; }
+.grid-1 { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 16px; width: 100%; min-width: 0; }
+
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  width: 100%;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+.card-subtitle {
+  font-size: 12px;
+  color: var(--text3);
+}
+.card-insight {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border-radius: 8px;
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.6;
+  border-left: 3px solid var(--yellow);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  width: 100%;
+  min-width: 0;
+}
+
+/* TABS */
+.tab-nav {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  width: 100%;
+  min-width: 0;
+}
+.tab-btn {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: var(--text2);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all .15s;
+}
+.tab-btn.active { color: var(--text); border-bottom-color: var(--text); font-weight: 600; }
+.tab-btn:hover:not(.active) { color: var(--text); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* TABLE */
+.data-table { 
+  width: 100%; 
+  border-collapse: collapse; 
+  font-size: 13px;
+  min-width: 600px;
+  table-layout: auto;
+  display: table;
+}
+.data-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  border-bottom: 2px solid var(--border);
+  background: var(--bg);
+}
+.data-table th:not(:first-child) { text-align: center; }
+.data-table td {
+  padding: 10px 12px;
+  text-align: center;
+  font-weight: 500;
+  border-bottom: 1px solid var(--border2);
+  font-variant-numeric: tabular-nums;
+}
+.data-table td:first-child { 
+  text-align: left; 
+  font-weight: 500; 
+  color: var(--text);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 200px;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table .cell-best { background: var(--green-soft); color: var(--green); font-weight: 600; border-radius: 4px; }
+.data-table .cell-worst { background: var(--red-soft); color: var(--red); border-radius: 4px; }
+.data-table .cell-neg { color: var(--red); }
+
+/* HALLUCINATION ROW */
+.hall-row { 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  margin-bottom: 12px;
+  width: 100%;
+  min-width: 0;
+}
+.hall-label { 
+  width: 100px; 
+  min-width: 80px;
+  font-size: 13px; 
+  font-weight: 500; 
+  text-align: right; 
+  flex-shrink: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.hall-bar-wrap { 
+  flex: 1; 
+  min-width: 0;
+  height: 24px; 
+  background: var(--bg); 
+  border-radius: 6px; 
+  overflow: hidden; 
+}
+.hall-bar {
+  height: 100%;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  transition: width .6s ease;
+}
+.hall-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text2);
+  width: 30px;
+  text-align: right;
+}
+
+/* KEY FINDINGS */
+.findings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+  width: 100%;
+  min-width: 0;
+}
+.finding {
+  padding: 14px 16px;
+  background: var(--bg);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.55;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+.finding strong { color: var(--text); font-weight: 600; }
+.finding .tag-good {
+  display: inline-block;
+  background: var(--green-soft);
+  color: var(--green);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-left: 4px;
+}
+.finding .tag-bad {
+  display: inline-block;
+  background: var(--red-soft);
+  color: var(--red);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 3px;
+  margin-left: 4px;
+}
+
+/* METHODOLOGY */
+.methodology {
+  margin-top: 24px;
+  padding: 20px 24px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+.methodology h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.methodology p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.65;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.scale-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+  width: 100%;
+  min-width: 0;
+}
+.scale-item {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--bg);
+  color: var(--text2);
+  border: 1px solid var(--border2);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.scale-item span { font-weight: 700; }
+
+.footer {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text3);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  width: 100%;
+}
+
+.chart-container { 
+  position: relative; 
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  min-height: 250px;
+  overflow: hidden;
+}
+.radar-wrap { 
+  max-width: 380px; 
+  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+/* Очень маленькие экраны (до 360px) */
+@media (max-width: 360px) {
+  .container {
+    padding: 12px 10px 24px;
+  }
+  
+  .header-top h1 {
+    font-size: 16px;
+  }
+  
+  .kpi-card {
+    padding: 12px 14px;
+  }
+  
+  .kpi-model {
+    font-size: 13px;
+  }
+  
+  .kpi-score {
+    font-size: 20px;
+  }
+  
+  .card {
+    padding: 12px 14px;
+  }
+  
+  .context-banner {
+    padding: 14px 16px;
+  }
+  
+  .chart-container[style*="height"] {
+    height: 200px !important;
+    min-height: 200px;
+  }
+  
+  .table-wrapper {
+    margin-left: -10px;
+    margin-right: -10px;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  
+  .data-table {
+    font-size: 10px;
+    min-width: 480px;
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: 6px 8px;
+  }
+  
+  .hall-label {
+    width: 60px;
+    min-width: 60px;
+    font-size: 10px;
+  }
+}
+
+/* Улучшение графиков на всех устройствах */
+.chart-container canvas {
+  max-width: 100%;
+  height: auto !important;
+}
+
+
+/* OVERFLOW PROTECTION */
+img, canvas, svg, video {
+  max-width: 100%;
+  height: auto;
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <h1>Benchmark юридических AI-моделей</h1>
+      <span class="badge">2026</span>
+    </div>
+    <p>Сравнительное тестирование пяти моделей генеративного ИИ на 28 юридических задачах. Оценка проводилась по качеству ответов с учётом точности, полноты и наличия галлюцинаций.</p>
+  </div>
+
+  <!-- CONTEXT -->
+  <div class="context-banner">
+    <h3>О бенчмарке</h3>
+    <p>Каждая модель решала 28 задач из четырёх сценариев реальной юридической практики: анализ и правка договоров, подготовка процессуальных документов, подбор судебной практики и консультирование по кейсам. Задачи охватывают 6 отраслей права и 3 уровня сложности. Оценки выставлялись экспертами по шкале от −4 (грубая ошибка с галлюцинацией) до +4 (безупречный ответ). Штрафы применялись за фактические ошибки и выдуманные ссылки на нормативные акты.</p>
+    <div class="context-grid">
+      <div class="context-item">
+        <div class="label">Задач</div>
+        <div class="value">28</div>
+        <div class="sub">по 4 сценариям</div>
+      </div>
+      <div class="context-item">
+        <div class="label">Моделей</div>
+        <div class="value">5</div>
+        <div class="sub">вкл. специализированные</div>
+      </div>
+      <div class="context-item">
+        <div class="label">Отраслей права</div>
+        <div class="value">6</div>
+        <div class="sub">от трудового до ИС</div>
+      </div>
+      <div class="context-item">
+        <div class="label">Шкала</div>
+        <div class="value">−4…+4</div>
+        <div class="sub">экспертная оценка</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-strip" id="kpiStrip"></div>
+
+  <!-- MAIN CHARTS -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Средний балл по моделям</div>
+          <div class="card-subtitle">Среднее арифметическое по 28 задачам</div>
+        </div>
+      </div>
+      <div class="chart-container"><canvas id="chartOverall"></canvas></div>
+      <div class="card-insight">Claude sonnet 4.5 лидирует с отрывом 0.85 балла от ближайшего конкурента. Разрыв между 2 и 4 местом — всего 0.54 балла, что говорит о плотной конкуренции в среднем сегменте.</div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Галлюцинации</div>
+          <div class="card-subtitle">Количество задач, в которых модель допустила фактические выдумки</div>
+        </div>
+      </div>
+      <div id="hallBars" style="padding: 8px 0;"></div>
+      <div class="card-insight">Меньше всего галлюцинаций у Claude sonnet 4.5 (2 из 28). GigaChat галлюцинировал в трети задач (10 из 28) — это основная причина его низкого среднего балла из-за штрафных коэффициентов.</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Профиль моделей по сценариям</div>
+          <div class="card-subtitle">Средний балл в каждом типе задач</div>
+        </div>
+      </div>
+      <div class="radar-wrap"><canvas id="chartRadar"></canvas></div>
+      <div class="card-insight">Claude sonnet 4.5 показывает сбалансированный профиль без провалов. GPT-4o сильна в договорах (2.81), но слаба в подборе практики (−1.18) — возможно, из-за склонности выдумывать реквизиты судебных актов.</div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Диапазон оценок</div>
+          <div class="card-subtitle">Минимальный, средний и максимальный балл каждой модели</div>
+        </div>
+      </div>
+      <div class="chart-container"><canvas id="chartRange"></canvas></div>
+      <div class="card-insight">GigaChat имеет самый широкий разброс: от −16 до +4. Экстремально низкий минимум — результат задачи 3.8 (подбор практики, сложная), где модель сгенерировала полностью выдуманные судебные решения.</div>
+    </div>
+  </div>
+
+  <!-- DETAILED TABS -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Детальный анализ по срезам</div>
+        <div class="card-subtitle">Средний балл моделей в разрезе сложности, отрасли и сценария</div>
+      </div>
+    </div>
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab(this,'level')">По сложности</button>
+      <button class="tab-btn" onclick="switchTab(this,'domain')">По сфере права</button>
+      <button class="tab-btn" onclick="switchTab(this,'scenario')">По сценарию</button>
+    </div>
+
+    <div id="tab-level" class="tab-content active">
+      <div class="chart-container" style="height:300px;"><canvas id="chartLevel"></canvas></div>
+      <div class="card-insight" style="margin-top:16px;">На простых задачах все модели показывают приемлемый результат (1.5–2.0). Ключевые различия проявляются на средней и сложной сложности: Claude sonnet 4.5 держит уровень 2.5+, тогда как GigaChat проваливается до −4.0 на сложных задачах.</div>
+    </div>
+    <div id="tab-domain" class="tab-content">
+      <div class="chart-container" style="height:300px;"><canvas id="chartDomain"></canvas></div>
+      <div class="card-insight" style="margin-top:16px;">Право ИС — самая полярная область: GPT-4o набирает 2.63, а GigaChat лишь 0.75. В обязательственном праве (самая представленная отрасль) Claude sonnet 4.5 уверенно лидирует. Трудовое право — единственная отрасль, где Нейроюрист приближается к Claude sonnet 4.5 </div>
+    </div>
+    <div id="tab-scenario" class="tab-content">
+      <div class="chart-container" style="height:300px;"><canvas id="chartScenario"></canvas></div>
+      <div class="card-insight" style="margin-top:16px;">Подбор судебной практики — самый сложный сценарий для всех моделей: средний балл по всем моделям здесь 0.51 против 2.0+ по остальным сценариям. Это связано с тем, что модели часто генерируют несуществующие ссылки на судебные акты.</div>
+    </div>
+  </div>
+
+  <!-- HEATMAPS -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Сложность × Модель</div></div>
+      <div class="table-wrapper"><div id="heatLevel"></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Сфера права × Модель</div></div>
+      <div class="table-wrapper"><div id="heatDomain"></div></div>
+    </div>
+  </div>
+  <div class="grid-1">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Сценарий × Модель</div></div>
+      <div class="table-wrapper"><div id="heatScenario"></div></div>
+    </div>
+  </div>
+
+  <!-- KEY FINDINGS -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">Ключевые выводы</div></div>
+    <div class="findings">
+      <div class="finding">
+        <strong>Claude sonnet 4.5</strong> — безусловный лидер бенчмарка. Единственная модель со средним баллом выше 2.0. Минимум галлюцинаций (2), стабильный результат на всех уровнях сложности. <span class="tag-good">Лучший выбор</span>
+      </div>
+      <div class="finding">
+        <strong>GPT-4o</strong> — сильна в анализе договоров (2.81) и праве ИС (2.63), но критически слаба в подборе судебной практики (−1.18). Высокий уровень галлюцинаций при работе с российскими правовыми источниками. <span class="tag-bad">6 галлюцинаций</span>
+      </div>
+      <div class="finding">
+        <strong>Нейроюрист</strong> — специализированная модель, стабильная на простых и средних задачах. Слабее универсальных моделей на сложных кейсах, но допускает меньше грубых ошибок, чем GigaChat и ConsLegal.
+      </div>
+      <div class="finding">
+        <strong>GigaChat</strong> — самый непредсказуемый результат: от +4 до −16. На простых задачах не уступает лидерам, но на сложных — катастрофический провал. Рекордсмен по галлюцинациям (10). <span class="tag-bad">Высокий риск</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- METHODOLOGY -->
+  <div class="methodology">
+    <h3>Методология оценки</h3>
+    <p>Каждый ответ оценивался оценивался юристом, как второе мнение выступал Gemini 3 PRO. Итоговый балл — среднее двух оценок. Штрафы за галлюцинации (выдуманные нормативные акты, несуществующие судебные решения) применялись мультипликативно: наличие галлюцинации снижало оценку даже при частично верном ответе.</p>
+    <div class="scale-row">
+      <div class="scale-item"><span>+4</span> — безупречно</div>
+      <div class="scale-item"><span>+3</span> — отлично</div>
+      <div class="scale-item"><span>+2</span> — хорошо</div>
+      <div class="scale-item"><span>+1</span> — приемлемо</div>
+      <div class="scale-item"><span>0</span> — нет ценности</div>
+      <div class="scale-item"><span>−2</span> — ошибка</div>
+      <div class="scale-item"><span>−4</span> — грубая ошибка</div>
+    </div>
+  </div>
+
+  <div class="footer">Бенчмарк юридических AI-моделей · Автор - Русинов Алексей @Alexey_rsv</div>
+</div>
+
+<script>
+const models = ['Нейроюрист','GPT-4o','Claude sonnet 4.5','GigaChat','ConsLegal'];
+const mColors = ['#e8453c','#8b5cf6','#3aa757','#e09100','#4a90d9'];
+const mColorsBg = mColors.map(c => c + '22');
+
+const tasks = [
+  {sc:'Анализ и правка договора',lv:'Простая',dm:'Обязательственное',s:[1.5,2,2,2,2]},
+  {sc:'Анализ и правка договора',lv:'Простая',dm:'ЗПП',s:[1.5,2,2,2,2]},
+  {sc:'Анализ и правка договора',lv:'Простая',dm:'Обязательственное',s:[1.5,2,2,2,2]},
+  {sc:'Анализ и правка договора',lv:'Средняя',dm:'Трудовое',s:[2.25,2.25,3,2.25,3]},
+  {sc:'Анализ и правка договора',lv:'Средняя',dm:'Рекламное',s:[3,3,3,1.5,2.25]},
+  {sc:'Анализ и правка договора',lv:'Средняя',dm:'Информационное',s:[2.25,3,3,2.25,1.5]},
+  {sc:'Анализ и правка договора',lv:'Средняя',dm:'ИС',s:[1.5,3,0,-1.5,0]},
+  {sc:'Анализ и правка договора',lv:'Сложная',dm:'Обязательственное',s:[2,4,4,4,0]},
+  {sc:'Анализ и правка договора',lv:'Сложная',dm:'Рекламное',s:[-2,4,4,0,0]},
+  {sc:'Процессуальный документ',lv:'Простая',dm:'Трудовое',s:[2,2,2,1,1]},
+  {sc:'Процессуальный документ',lv:'Простая',dm:'Обязательственное',s:[1.5,2,2,2,2]},
+  {sc:'Процессуальный документ',lv:'Простая',dm:'Рекламное',s:[1,2,2,-2,2]},
+  {sc:'Процессуальный документ',lv:'Средняя',dm:'Трудовое',s:[0.75,-1.5,3,-3,2.25]},
+  {sc:'Процессуальный документ',lv:'Средняя',dm:'ЗПП',s:[3,-2.25,3,-2.25,-2.25]},
+  {sc:'Процессуальный документ',lv:'Средняя',dm:'Информационное',s:[0,3,3,2.25,-1.5]},
+  {sc:'Процессуальный документ',lv:'Средняя',dm:'Трудовое',s:[0,1.5,3,0,0]},
+  {sc:'Процессуальный документ',lv:'Сложная',dm:'Обязательственное',s:[0,2,2,-2,0]},
+  {sc:'Подбор судебной практики',lv:'Простая',dm:'Информационное',s:[2,-1.5,2,2,0]},
+  {sc:'Подбор судебной практики',lv:'Простая',dm:'Обязательственное',s:[1.5,2,2,0,-1]},
+  {sc:'Подбор судебной практики',lv:'Простая',dm:'Трудовое',s:[2,2,2,2,2]},
+  {sc:'Подбор судебной практики',lv:'Средняя',dm:'ЗПП',s:[3,1,2,1,2]},
+  {sc:'Подбор судебной практики',lv:'Средняя',dm:'Рекламное',s:[2.5,-1.5,2,1.5,1.5]},
+  {sc:'Подбор судебной практики',lv:'Средняя',dm:'ИС',s:[3,2.25,3,3,3]},
+  {sc:'Подбор судебной практики',lv:'Средняя',dm:'Обязательственное',s:[-2,-0.5,0,-3,-1.5]},
+  {sc:'Подбор судебной практики',lv:'Сложная',dm:'Обязательственное',s:[-6,-12,1.5,-16,4]},
+  {sc:'Консультация по кейсу',lv:'Простая',dm:'Обязательственное',s:[2,2,2,2,0]},
+  {sc:'Консультация по кейсу',lv:'Простая',dm:'Трудовое',s:[2,1.5,2,2,0]},
+  {sc:'Консультация по кейсу',lv:'Средняя',dm:'Информационное',s:[3,2.25,3,3,0]},
+];
+const hall = [4,6,2,10,5];
+
+function avg(key, val) {
+  const f = tasks.filter(t => t[key]===val);
+  return models.map((_,i) => +(f.reduce((a,t) => a+t.s[i],0)/f.length).toFixed(2));
+}
+const oAvg = models.map((_,i) => +(tasks.reduce((a,t)=>a+t.s[i],0)/tasks.length).toFixed(2));
+
+// KPI
+const ranked = models.map((m,i)=>({name:m,avg:oAvg[i],color:mColors[i],hall:hall[i],
+  max:Math.max(...tasks.map(t=>t.s[i])),min:Math.min(...tasks.map(t=>t.s[i]))}))
+  .sort((a,b)=>b.avg-a.avg);
+
+const rankLabels = ['1 место','2 место','3 место','4 место','5 место'];
+document.getElementById('kpiStrip').innerHTML = ranked.map((r,i) => `
+  <div class="kpi-card">
+    <div class="kpi-rank">${rankLabels[i]}</div>
+    <div class="kpi-model" style="color:${r.color}">${r.name}</div>
+    <div class="kpi-score">${r.avg.toFixed(2)}</div>
+    <div class="kpi-details">
+      <span class="kpi-pill good">max ${r.max.toFixed(1)}</span>
+      <span class="kpi-pill ${r.hall>5?'bad':''}">hall: ${r.hall}</span>
+    </div>
+  </div>
+`).join('');
+
+// CHART DEFAULTS
+Chart.defaults.color = '#7b7e86';
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.font.size = 12;
+const gridColor = '#edeef0';
+
+// OVERALL BAR
+new Chart(document.getElementById('chartOverall'), {
+  type: 'bar',
+  data: {
+    labels: models,
+    datasets: [{
+      data: oAvg,
+      backgroundColor: mColors.map(c=>c+'cc'),
+      borderColor: mColors,
+      borderWidth: 1,
+      borderRadius: 6,
+      borderSkipped: false,
+      maxBarThickness: 56,
+    }]
+  },
+  options: {
+    responsive:true,
+    maintainAspectRatio:true,
+    plugins:{legend:{display:false},tooltip:{backgroundColor:'#fff',titleColor:'#1a1a1a',bodyColor:'#1a1a1a',borderColor:'#e5e7eb',borderWidth:1,padding:10,callbacks:{label:c=>`Средний: ${c.parsed.y.toFixed(2)}`}}},
+    scales:{y:{grid:{color:gridColor},beginAtZero:true,ticks:{stepSize:0.5}},x:{grid:{display:false}}}
+  }
+});
+
+// HALLUCINATION BARS
+const maxH = Math.max(...hall);
+const hallColors = ['#e8453c','#8b5cf6','#3aa757','#e09100','#4a90d9'];
+document.getElementById('hallBars').innerHTML = models.map((m,i) => `
+  <div class="hall-row">
+    <div class="hall-label" style="color:${mColors[i]}">${m}</div>
+    <div class="hall-bar-wrap">
+      <div class="hall-bar" style="width:${hall[i]/maxH*100}%;background:${hall[i]>5?'#e8453c':hall[i]>3?'#e09100':'#3aa757'};">${hall[i]}</div>
+    </div>
+  </div>
+`).join('');
+
+// RADAR
+const scLabels = ['Договоры','Процессуальные','Суд. практика','Консультации'];
+const scKeys = ['Анализ и правка договора','Процессуальный документ','Подбор судебной практики','Консультация по кейсу'];
+new Chart(document.getElementById('chartRadar'), {
+  type: 'radar',
+  data: {
+    labels: scLabels,
+    datasets: models.map((m,i) => ({
+      label: m,
+      data: scKeys.map(k => avg('sc',k)[i]),
+      borderColor: mColors[i],
+      backgroundColor: mColors[i]+'18',
+      borderWidth: 2,
+      pointRadius: 3,
+      pointBackgroundColor: mColors[i],
+    }))
+  },
+  options: {
+    responsive:true,
+    maintainAspectRatio:true,
+    plugins:{legend:{position:window.innerWidth <= 768 ? 'bottom' : 'bottom',labels:{usePointStyle:true,pointStyle:'circle',padding:window.innerWidth <= 768 ? 8 : 12,font:{size:window.innerWidth <= 768 ? 10 : 11}}}},
+    scales:{r:{angleLines:{color:gridColor},grid:{color:gridColor},pointLabels:{font:{size:window.innerWidth <= 768 ? 10 : 11,weight:500}},ticks:{display:false},suggestedMin:-2,suggestedMax:3}}
+  }
+});
+
+// RANGE (floating bar)
+new Chart(document.getElementById('chartRange'), {
+  type: 'bar',
+  data: {
+    labels: models,
+    datasets: [
+      {
+        label: 'Диапазон (min→max)',
+        data: models.map((_,i) => [Math.min(...tasks.map(t=>t.s[i])), Math.max(...tasks.map(t=>t.s[i]))]),
+        backgroundColor: mColors.map(c=>c+'33'),
+        borderColor: mColors,
+        borderWidth: 1,
+        borderRadius: 4,
+        borderSkipped: false,
+        maxBarThickness: 40,
+      },
+      {
+        label: 'Средний балл',
+        data: oAvg,
+        type: 'line',
+        borderColor: '#1a1a1a',
+        backgroundColor: '#1a1a1a',
+        borderWidth: 2,
+        pointRadius: 5,
+        pointBackgroundColor: '#fff',
+        pointBorderColor: '#1a1a1a',
+        pointBorderWidth: 2,
+        tension: 0,
+      }
+    ]
+  },
+  options: {
+    responsive:true,
+    maintainAspectRatio:true,
+    plugins:{legend:{position:'top',labels:{usePointStyle:true,padding:12,font:{size:11}}},tooltip:{backgroundColor:'#fff',titleColor:'#1a1a1a',bodyColor:'#1a1a1a',borderColor:'#e5e7eb',borderWidth:1,padding:10}},
+    scales:{y:{grid:{color:gridColor}},x:{grid:{display:false}}}
+  }
+});
+
+// GROUPED BARS
+function groupedBar(id, labels, key) {
+  const isMobile = window.innerWidth <= 768;
+  new Chart(document.getElementById(id), {
+    type:'bar',
+    data:{labels, datasets:models.map((m,i)=>({label:m,data:labels.map(l=>avg(key,l)[i]),backgroundColor:mColors[i]+'bb',borderColor:mColors[i],borderWidth:1,borderRadius:4,borderSkipped:false}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top',labels:{usePointStyle:true,pointStyle:'rectRounded',padding:isMobile?10:14,font:{size:isMobile?10:11}}},tooltip:{backgroundColor:'#fff',titleColor:'#1a1a1a',bodyColor:'#1a1a1a',borderColor:'#e5e7eb',borderWidth:1,padding:isMobile?8:10}},scales:{y:{grid:{color:gridColor},beginAtZero:true,ticks:{font:{size:isMobile?10:12}}},x:{grid:{display:false},ticks:{font:{size:isMobile?10:12}}}}}
+  });
+}
+groupedBar('chartLevel',['Простая','Средняя','Сложная'],'lv');
+groupedBar('chartDomain',['Обязательственное','ЗПП','Трудовое','Рекламное','Информационное','ИС'],'dm');
+groupedBar('chartScenario',scKeys,'sc');
+
+// TABS
+function switchTab(btn, id) {
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// HEATMAPS
+function heatBg(v, best, worst) {
+  if (v===best) return 'var(--green-soft)';
+  if (v===worst) return 'var(--red-soft)';
+  if (v<0) return '#fef2f2';
+  return 'transparent';
+}
+function heatmap(id, labels, key) {
+  const rows = labels.map(l => {
+    const a = avg(key,l);
+    const mx = Math.max(...a), mn = Math.min(...a);
+    return `<tr><td>${l}</td>${a.map((v,i) =>
+      `<td class="${v===mx?'cell-best':v===mn?'cell-worst':''} ${v<0?'cell-neg':''}">${v.toFixed(2)}</td>`
+    ).join('')}</tr>`;
+  });
+  document.getElementById(id).innerHTML = `<table class="data-table"><thead><tr><th></th>${models.map((m,i)=>`<th style="color:${mColors[i]}">${m}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`;
+}
+heatmap('heatLevel',['Простая','Средняя','Сложная'],'lv');
+heatmap('heatDomain',['Обязательственное','ЗПП','Трудовое','Рекламное','Информационное','ИС'],'dm');
+heatmap('heatScenario',scKeys,'sc');
+</script>
+</body>
+</html>
